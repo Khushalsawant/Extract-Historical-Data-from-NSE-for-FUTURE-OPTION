@@ -40,29 +40,8 @@ def get_bhavcopy_url(d):
     url = bhavcopy_base_url % (year, month, date)
     return url
 
-def nse_opener():
-    """
-    builds opener for urllib2
-    :return: opener object
-    """
-    cj = CookieJar()
-    return build_opener(HTTPCookieProcessor(cj))
-
-def convert_sec(n): 
-    return str(datetime.timedelta(seconds = n))
-
-if __name__ == "__main__":
-    FO_historical_data_df = pd.DataFrame()    
-    headers = {'Accept' : '*/*',
-                'Accept-Language' : 'en-US,en;q=0.5',
-                'Host': 'nseindia.com',
-                'Referer': "https://www.nseindia.com/live_market/dynaContent/live_watch/get_quote/GetQuote.jsp?symbol=INFY&illiquid=0&smeFlag=0&itpFlag=0",
-                'User-Agent' : 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:28.0) Gecko/20100101 Firefox/28.0',
-                'X-Requested-With': 'XMLHttpRequest'
-                }
-    Start_date = datetime.datetime.now() + datetime.timedelta(-8)
-    Current_date = datetime.datetime.now() + datetime.timedelta(-1)
-    date_value_df = pd.date_range(start=Start_date, end=Current_date)
+def exract_NSE_FO_historical_data(date_value_df,FO_historical_data_df):
+    ''' exract_NSE_FO_historical_data '''
     path_for_zip_extract = "C:/Users/khushal/Downloads/FO_Historical_data"
     opener = nse_opener()
     #print("date_value_df = ",date_value_df)
@@ -92,14 +71,42 @@ if __name__ == "__main__":
             
             # extracting all the files 
             #zf.extractall(path_for_zip_extract)
-            print(" Extrctig file for %s" %d.strftime('%d%b%Y').upper())
+            print(" Extractig file for %s" %d.strftime('%d%b%Y').upper())
         elif response.status_code != 200:
             print("status_code = ",response.status_code)
-            print(" Un-reachable NSE_URL = ",NSE_URL)
+            print("For %s  , NSE_URL is Un-reachable " %d.strftime('%d%b%Y').upper())
     
-    print(FO_historical_data_df)
+    #print(FO_historical_data_df)
     final_file_details = path_for_zip_extract + "FO_historical_data.csv"
     FO_historical_data_df.to_csv(final_file_details)
+    return FO_historical_data_df
+    
+
+def nse_opener():
+    """
+    builds opener for urllib2
+    :return: opener object
+    """
+    cj = CookieJar()
+    return build_opener(HTTPCookieProcessor(cj))
+
+def convert_sec(n): 
+    return str(datetime.timedelta(seconds = n))
+
+if __name__ == "__main__":
+    FO_historical_data_df = pd.DataFrame()    
+    headers = {'Accept' : '*/*',
+                'Accept-Language' : 'en-US,en;q=0.5',
+                'Host': 'nseindia.com',
+                'Referer': "https://www.nseindia.com/live_market/dynaContent/live_watch/get_quote/GetQuote.jsp?symbol=INFY&illiquid=0&smeFlag=0&itpFlag=0",
+                'User-Agent' : 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:28.0) Gecko/20100101 Firefox/28.0',
+                'X-Requested-With': 'XMLHttpRequest'
+                }
+    Start_date = datetime.datetime.now() + datetime.timedelta(-8)
+    Current_date = datetime.datetime.now() + datetime.timedelta(-1)
+    date_value_df = pd.date_range(start=Start_date, end=Current_date)
+    
+    FO_historical_data_df = exract_NSE_FO_historical_data(date_value_df,FO_historical_data_df)
     '''
     URL = get_bhavcopy_url(d)
     response = requests.get(URL,verify=False)        # To execute get request 
